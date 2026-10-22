@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TING'S ENGLISH LAB ｜ 雅思 8.5+ 學術聽力旗艦原聲音檔播放器</title>
+    <style>
+        :root {
+            --primary-navy: #0F2744;
+            --accent-teal: #00838F;
+            --accent-blue: #0284C7;
+            --bg-light: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --highlight: #C53030;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background: var(--bg-light); color: var(--text-main); line-height: 1.6; }
+        
+        /* Top Navigation Header */
+        header { background: var(--primary-navy); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.5px; }
+        .brand-sub { font-size: 0.8rem; color: #94A3B8; margin-top: 2px; }
+        .badge { background: var(--accent-teal); color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+
+        /* Main Container */
+        .app-container { display: grid; grid-template-columns: 320px 1fr; min-height: calc(100vh - 72px); }
+        @media (max-width: 900px) { .app-container { grid-template-columns: 1fr; } }
+
+        /* Left Sidebar Unit List */
+        .sidebar { background: #fff; border-right: 1px solid var(--border-color); overflow-y: auto; max-height: calc(100vh - 72px); padding: 16px; }
+        .sidebar-title { font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; }
+        .unit-card { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; cursor: pointer; transition: all 0.2s ease; background: #fff; }
+        .unit-card:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .unit-card.active { border-color: var(--accent-teal); background: #F0FDF4; border-left: 4px solid var(--accent-teal); }
+        .unit-tag { font-size: 0.7rem; font-weight: 700; color: var(--accent-blue); }
+        .unit-name { font-size: 0.9rem; font-weight: 600; color: var(--primary-navy); margin: 3px 0; }
+        .unit-meta { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Main Player & Content Area */
+        .content-area { padding: 24px; overflow-y: auto; max-height: calc(100vh - 72px); }
+        
+        /* Persistent Audio Player Bar */
+        .player-bar { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); margin-bottom: 24px; }
+        .player-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .current-title { font-size: 1.2rem; font-weight: 700; color: var(--primary-navy); }
+        .current-speaker { font-size: 0.85rem; color: var(--text-muted); }
+        
+        /* Audio Controls */
+        .controls-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .btn-ctrl { background: var(--primary-navy); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.1s; }
+        .btn-ctrl:hover { transform: scale(1.05); }
+        .btn-sec { background: var(--bg-light); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; padding: 6px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .btn-sec:hover { background: #E2E8F0; }
+        .speed-select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem; font-weight: 600; color: var(--primary-navy); background: #fff; cursor: pointer; }
+        
+        /* Timeline */
+        .timeline-container { display: flex; align-items: center; gap: 12px; }
+        .time-text { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); min-width: 42px; }
+        .scrubber { flex: 1; height: 6px; border-radius: 3px; background: #E2E8F0; outline: none; -webkit-appearance: none; cursor: pointer; }
+        .scrubber::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent-teal); cursor: pointer; }
+
+        /* QR Code & Mobile Box */
+        .qr-section { display: flex; align-items: center; gap: 16px; background: #F8FAFC; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-top: 14px; }
+        .qr-img { width: 64px; height: 64px; border-radius: 4px; border: 1px solid #CBD5E1; }
+        .qr-text { font-size: 0.8rem; color: var(--text-muted); }
+        .qr-highlight { font-weight: 700; color: var(--primary-navy); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+        .tab-btn { padding: 10px 18px; border: none; background: none; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+
+        /* Content Panes */
+        .tab-pane { display: none; background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .tab-pane.active { display: block; }
+        
+        .script-section { margin-bottom: 20px; }
+        .script-sec-title { font-size: 0.95rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px; }
+        .script-sec-text { font-size: 0.95rem; color: #334155; line-height: 1.7; text-align: justify; }
+
+        .notes-box { background: #F8FAFC; border: 1px solid #CBD5E1; border-left: 4px solid var(--accent-blue); border-radius: 8px; padding: 18px; margin-bottom: 20px; }
+        .notes-item { margin-bottom: 8px; font-size: 0.9rem; color: #1E293B; }
+        
+        .mc-item { background: #F8FAFC; border-radius: 8px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border-color); font-size: 0.9rem; }
+        .ans-pill { display: inline-block; background: #FEE2E2; color: #991B1B; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 6px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <div class="brand-title">TING'S ENGLISH LAB 廷暉英語認知工坊</div>
+        <div class="brand-sub">雅思 8.5+ 學術聽力破局階梯 ‧ 認知負荷工程原聲音檔總庫</div>
+    </div>
+    <div class="badge">Band 8.5+ 聽力實戰音庫</div>
+</header>
+
+<div class="app-container">
+    <!-- Left Sidebar: 10 Units Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-title">課程單元目錄（10 大主題領域）</div>
+        <div id="unitList"></div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+        <!-- Persistent Audio Player Bar -->
+        <div class="player-bar">
+            <div class="player-header">
+                <div>
+                    <div id="dispTitle" class="current-title">載入中...</div>
+                    <div id="dispSpeaker" class="current-speaker">演講者配置中...</div>
+                </div>
+                <div>
+                    <select id="speedSelect" class="speed-select" onchange="changeSpeed(this.value)">
+                        <option value="0.8">0.8x 精聽跟讀</option>
+                        <option value="1.0" selected>1.0x 考場標準</option>
+                        <option value="1.1">1.1x 壓力競速</option>
+                        <option value="1.25">1.25x 提速極限</option>
+                    </select>
+                </div>
+            </div>
+
+            <audio id="audioPlayer" preload="auto" ontimeupdate="updateProgress()" onended="onAudioEnded()"></audio>
+
+            <div class="controls-row">
+                <button class="btn-ctrl" onclick="togglePlay()" id="playBtn">▶</button>
+                <button class="btn-sec" onclick="skipTime(-10)">⏪ 10秒</button>
+                <button class="btn-sec" onclick="skipTime(10)">⏩ 10秒</button>
+                <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">快速跳轉章節：</div>
+                <button class="btn-sec" onclick="jumpTo(0)">Sec 1</button>
+                <button class="btn-sec" onclick="jumpTo(60)">Sec 2</button>
+                <button class="btn-sec" onclick="jumpTo(120)">Sec 3</button>
+                <button class="btn-sec" onclick="jumpTo(180)">Sec 4</button>
+                <button class="btn-sec" onclick="jumpTo(240)">Sec 5</button>
+            </div>
+
+            <div class="timeline-container">
+                <span id="currentTime" class="time-text">0:00</span>
+                <input type="range" id="scrubber" class="scrubber" value="0" min="0" max="100" oninput="seekAudio(this.value)">
+                <span id="totalTime" class="time-text">0:00</span>
+            </div>
+
+            <div class="qr-section">
+                <img id="qrDisplay" class="qr-img" src="" alt="QR Code">
+                <div class="qr-text">
+                    <div class="qr-highlight">📱 行動裝置掃碼隨身聽</div>
+                    <div>講義紙本與學生測驗本均已同步印製專屬 QR Code，手機相機一掃即刻於背景播放此篇原聲講座！</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('questionsTab', this)">考場標準測驗題組 (Questions 1–10 優先作答)</button>
+            <button class="tab-btn" onclick="switchTab('transcriptTab', this)">聽力原聲逐字稿 (Script 精聽跟讀)</button>
+            <button class="tab-btn" onclick="switchTab('answersTab', this)">考點手術刀詳解 (Analysis 覆盤)</button>
+        </div>
+
+        <!-- Tab 1: Questions (Default) -->
+        <div id="questionsTab" class="tab-pane active">
+            <div id="questionsContent"></div>
+        </div>
+
+        <!-- Tab 2: Transcript -->
+        <div id="transcriptTab" class="tab-pane">
+            <div id="transcriptContent"></div>
+        </div>
+
+        <!-- Tab 3: Answers & Analysis -->
+        <div id="answersTab" class="tab-pane">
+            <div id="answersContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const UNITS_DATA = [
+    {
+        num: 1,
+        folder: "環境科學與地球物理",
+        prefix: "Unit01_The_Atlantic_Conveyor",
+        tag: "第一篇章 ‧ 自然科學與尖端科技",
+        title: "The Atlantic Conveyor: Ocean Circulation, Marine Geophysical Dynamics, and Climate Tipping Points",
+        speaker: "Prof. Julian Vance (British RP, en-GB-RyanNeural)",
+        timing: "音檔長度約 6 分 45 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit01_The_Atlantic_Conveyor.mp3"
+    },
+    {
+        num: 2,
+        folder: "生命科學與神經科學領域",
+        prefix: "Unit02_The_Metabolic_Engine_of_Neuroplasticity",
+        tag: "第一篇章 ‧ 自然科學與尖端科技",
+        title: "The Metabolic Engine of Neuroplasticity: Cellular Respiration, Sirtuin Activation, and Cognitive Longevity",
+        speaker: "Dr. Elena Rostova (British Academic, en-GB-SoniaNeural)",
+        timing: "音檔長度約 6 分 40 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit02_The_Metabolic_Engine_of_Neuroplasticity.mp3"
+    },
+    {
+        num: 3,
+        folder: "硬核科技與系統工程領域",
+        prefix: "Unit03_The_Silicon_Synapse",
+        tag: "第一篇章 ‧ 自然科學與尖端科技",
+        title: "The Silicon Synapse: Systems Engineering in Neuromorphic Architecture and Memristive Networks",
+        speaker: "Dr. Marcus Thorne (Australian Engineering, en-AU-WilliamMultilingualNeural)",
+        timing: "音檔長度約 6 分 45 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit03_The_Silicon_Synapse.mp3"
+    },
+    {
+        num: 4,
+        folder: "天文物理與深空探索",
+        prefix: "Unit04_The_Atmospheric_Fingerprint",
+        tag: "第一篇章 ‧ 自然科學與尖端科技",
+        title: "The Atmospheric Fingerprint: Exoplanet Spectroscopy, Atmospheric Transmission, and Biosignature Detection",
+        speaker: "Prof. Arthur Pendelton (British Academic, en-GB-ThomasNeural)",
+        timing: "音檔長度約 6 分 50 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit04_The_Atmospheric_Fingerprint.mp3"
+    },
+    {
+        num: 5,
+        folder: "語言學與教育",
+        prefix: "Unit05_The_Linguistic_Relativity_Paradigm",
+        tag: "第二篇章 ‧ 人文、心智與社會科學",
+        title: "The Linguistic Relativity Paradigm: Cognitive Architecture, Cross-Linguistic Perception, and Pedagogical Evolution",
+        speaker: "Dr. Fiona Campbell (British Academic, en-GB-LibbyNeural)",
+        timing: "音檔長度約 6 分 40 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit05_The_Linguistic_Relativity_Paradigm.mp3"
+    },
+    {
+        num: 6,
+        folder: "社會科學與心理學領域",
+        prefix: "Unit06_The_Architecture_of_Choice",
+        tag: "第二篇章 ‧ 人文、心智與社會科學",
+        title: "The Architecture of Choice: Behavioral Nudge Theory, Default Architectures, and Cognitive Heuristics",
+        speaker: "Prof. Kenneth Bradley (American Academic, en-US-AndrewNeural)",
+        timing: "音檔長度約 6 分 45 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit06_The_Architecture_of_Choice.mp3"
+    },
+    {
+        num: 7,
+        folder: "歷史考古與人類學",
+        prefix: "Unit07_The_Epigraphic_Enigma",
+        tag: "第二篇章 ‧ 人文、心智與社會科學",
+        title: "The Epigraphic Enigma: Computational Epigraphy, Urbanism, and the Indus Valley Script",
+        speaker: "Dr. Alistair Ross (British Archaeology, en-GB-RyanNeural)",
+        timing: "音檔長度約 6 分 50 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit07_The_Epigraphic_Enigma.mp3"
+    },
+    {
+        num: 8,
+        folder: "建築設計與都市生態學",
+        prefix: "Unit08_The_Biophilic_Metropolis",
+        tag: "第三篇章 ‧ 當代治理、商業與前沿倫理",
+        title: "The Biophilic Metropolis: Biomimetic Engineering, Urban Heat Island Mitigation, and Microclimatic Design",
+        speaker: "Architect Claire Bennett (Australian Urbanist, en-AU-NatashaNeural)",
+        timing: "音檔長度約 6 分 45 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit08_The_Biophilic_Metropolis.mp3"
+    },
+    {
+        num: 9,
+        folder: "商業管理與宏觀經濟",
+        prefix: "Unit09_The_Creative_Destruction_Paradox",
+        tag: "第三篇章 ‧ 當代治理、商業與前沿倫理",
+        title: "The Creative Destruction Paradox: Platform Dominance, Network Externalities, and Contestable Markets",
+        speaker: "Prof. Christopher Davies (British Economics, en-GB-ThomasNeural)",
+        timing: "音檔長度約 6 分 50 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit09_The_Creative_Destruction_Paradox.mp3"
+    },
+    {
+        num: 10,
+        folder: "法律哲學與人工智慧倫理",
+        prefix: "Unit10_The_Algorithmic_Tribunal",
+        tag: "第三篇章 ‧ 當代治理、商業與前沿倫理",
+        title: "The Algorithmic Tribunal: Autonomous Agency, Moral Alignment, and the Jurisprudence of Artificial Intelligence",
+        speaker: "Justice Eleanor Vance (British Jurisprudence, en-GB-SoniaNeural)",
+        timing: "音檔長度約 6 分 45 秒 ｜ 標準考題 10 題",
+        audioPath: "./audio/Unit10_The_Algorithmic_Tribunal.mp3"
+    }
+];
+
+let currentUnitIndex = 0;
+const audio = document.getElementById('audioPlayer');
+const playBtn = document.getElementById('playBtn');
+
+function initApp() {
+    const listContainer = document.getElementById('unitList');
+    UNITS_DATA.forEach((u, idx) => {
+        const card = document.createElement('div');
+        card.className = `unit-card ${idx === 0 ? 'active' : ''}`;
+        card.onclick = () => selectUnit(idx);
+        card.innerHTML = `
+            <div class="unit-tag">Unit ${String(u.num).padStart(2, '0')} ‧ ${u.folder}</div>
+            <div class="unit-name">${u.title.split(':')[0]}</div>
+            <div class="unit-meta">${u.timing.split('｜')[0]}</div>
+        `;
+        listContainer.appendChild(card);
+    });
+    // Hash router for mobile QR code scanning
+    let initialIdx = 0;
+    const hash = window.location.hash.toLowerCase();
+    const match = hash.match(/unit(\d+)/);
+    if (match) {
+        const uNum = parseInt(match[1], 10);
+        const foundIdx = UNITS_DATA.findIndex(u => u.num === uNum);
+        if (foundIdx !== -1) {
+            initialIdx = foundIdx;
+        }
+    }
+    selectUnit(initialIdx);
+}
+
+function selectUnit(idx) {
+    document.querySelectorAll('.unit-card').forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+    });
+    loadUnit(idx);
+}
+
+function loadUnit(idx) {
+    currentUnitIndex = idx;
+    const u = UNITS_DATA[idx];
+    document.getElementById('dispTitle').innerText = `Unit ${String(u.num).padStart(2, '0')}: ${u.title}`;
+    document.getElementById('dispSpeaker').innerText = `🎤 主講學者：${u.speaker} ｜ 建議配速：${u.timing}`;
+    document.getElementById('qrDisplay').src = `./qr/unit${String(u.num).padStart(2, '0')}.png`;
+    
+    // Set audio source
+    audio.src = u.audioPath;
+    audio.load();
+    playBtn.innerText = '▶';
+    
+    // Load content
+    renderTabContent(u);
+}
+
+function renderTabContent(u) {
+    document.getElementById('transcriptContent').innerHTML = `
+        <div style="font-size: 0.85rem; color: var(--accent-teal); font-weight: 700; margin-bottom: 12px;">TING'S ENGLISH LAB ‧ 官方學術逐字稿（含路標詞標注）</div>
+        <div class="script-section">
+            <div class="script-sec-title">▶ 完整英美原聲演講逐字稿（Lecture Audio Script）</div>
+            <div class="script-sec-text">請配合上方音檔播放器進行 1.0x 考場模考或 0.8x 精聽跟讀。完整繁中精翻、考點手術刀詳解與核心詞庫請參閱專屬 PDF 講義：<br><b>${u.folder}/${u.title.replace(/:/g, '_')}.pdf</b></div>
+        </div>
+    `;
+    document.getElementById('questionsContent').innerHTML = `
+        <div class="notes-box">
+            <div style="font-weight: 700; color: var(--primary-navy); margin-bottom: 10px;">Questions 1–6: Lecture Notes Completion</div>
+            <div class="notes-item">• Complete the notes while listening to the audio lecture above.</div>
+            <div class="notes-item">• Write <b>NO MORE THAN TWO WORDS AND/OR A NUMBER</b> for each answer.</div>
+            <div class="notes-item">• 提示：注意聽前審題預測（詞性與語義槽位），並在聽中鎖定言談路標詞（However, Crucially, Therefore）！</div>
+        </div>
+        <div class="mc-item">
+            <div style="font-weight: 700; color: var(--primary-navy); margin-bottom: 6px;">Questions 7–10: Multiple Choice & Matching</div>
+            <div>選擇題特別注意考官設置的「原詞重現干擾項」與「否定轉折反轉」，答案必定以同義替換形式呈現。</div>
+        </div>
+    `;
+    document.getElementById('answersContent').innerHTML = `
+        <div class="notes-box">
+            <div style="font-weight: 700; color: var(--primary-navy); margin-bottom: 8px;">題目詳解與考點定位手術刀</div>
+            <div>全套 10 題完整解析、原聲定位句子引述、同義替換矩陣及可遷移寫作公式，已完整收錄於各單元獨立 PDF 講義第 6–8 頁中。</div>
+        </div>
+    `;
+}
+
+function togglePlay() {
+    if (audio.paused) {
+        audio.play();
+        playBtn.innerText = '⏸';
+    } else {
+        audio.pause();
+        playBtn.innerText = '▶';
+    }
+}
+
+function skipTime(sec) {
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + sec));
+}
+
+function jumpTo(sec) {
+    audio.currentTime = sec;
+    if (audio.paused) {
+        audio.play();
+        playBtn.innerText = '⏸';
+    }
+}
+
+function changeSpeed(val) {
+    audio.playbackRate = parseFloat(val);
+}
+
+function updateProgress() {
+    if (!audio.duration) return;
+    const progress = (audio.currentTime / audio.duration) * 100;
+    document.getElementById('scrubber').value = progress;
+    document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+    document.getElementById('totalTime').innerText = formatTime(audio.duration);
+}
+
+function seekAudio(val) {
+    if (!audio.duration) return;
+    audio.currentTime = (val / 100) * audio.duration;
+}
+
+function onAudioEnded() {
+    playBtn.innerText = '▶';
+}
+
+function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+window.onload = initApp;
+</script>
+
+</body>
+</html>
